@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Warm beige theme with vibrant purple */
+    --background: 34 36% 90%;
+    --foreground: 240 4% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 4% 18%;
+    --primary: 284 42% 64%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 18%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 36 52% 81%;
+    --accent-foreground: 240 4% 18%;
+    --muted: 0 0% 100%;
+    --muted-foreground: 240 2% 45%;
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --ring: 284 42% 64%;
+    --destructive: 12 77% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
+
+  * {
+    border-color: rgba(0,0,0,0.06);
+  }
+
+  body {
+    @apply text-foreground font-body antialiased;
+    background: #F2E8D9;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Fredoka', 'Nunito', 'DM Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-4 font-body font-medium text-base transition-all duration-normal;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground rounded-2xl border-none;
+    box-shadow: 0 4px 16px rgba(182, 119, 206, 0.25);
+    @apply hover:opacity-90 hover:-translate-y-px;
+    @apply active:translate-y-0;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 8px 24px rgba(182, 119, 206, 0.35);
+  }
+
+  .btn-secondary {
+    @apply btn border-2 border-transparent bg-muted text-foreground rounded-2xl;
+    @apply hover:bg-border;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-foreground rounded-xl;
+    @apply hover:bg-muted;
+  }
+
+  .card {
+    @apply bg-card text-card-foreground rounded-3xl p-6;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .input-field {
+    @apply w-full rounded-2xl border-2 border-input bg-card px-4 py-3;
+    @apply font-body text-base text-foreground placeholder:text-muted-foreground;
+    @apply transition-all duration-fast;
+    @apply focus:outline-none focus:border-primary;
+  }
+
+  .category-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 2s linear infinite;
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.2);
+}
