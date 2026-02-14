@@ -25,7 +25,7 @@ export function ScoreStreak({ stats, onReset }: ScoreStreakProps) {
   };
   
   return (
-    <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
       <div style={{ textAlign: 'center' }}>
         <p style={{ 
           fontSize: 10, 
@@ -71,15 +71,15 @@ export function ScoreStreak({ stats, onReset }: ScoreStreakProps) {
       </div>
       {onReset && (
         <>
-          <div style={{ width: 1, height: 24, background: 'rgba(0,0,0,0.08)' }} />
+          <div style={{ width: 1, height: 20, background: 'rgba(0,0,0,0.06)' }} />
           <button
             onClick={handleResetClick}
             title={showConfirm ? "Click again to confirm reset" : "Reset progress"}
             style={{
               background: showConfirm ? '#FEF0ED' : 'transparent',
               border: 'none',
-              padding: 6,
-              borderRadius: 8,
+              padding: 4,
+              borderRadius: 6,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -88,8 +88,8 @@ export function ScoreStreak({ stats, onReset }: ScoreStreakProps) {
             }}
           >
             <RotateCcw 
-              size={14} 
-              color={showConfirm ? '#D1242F' : textSecondary}
+              size={11} 
+              color={showConfirm ? '#D1242F' : '#bbb'}
               style={{ 
                 transition: 'transform 0.2s',
                 transform: showConfirm ? 'rotate(-45deg)' : 'none',
