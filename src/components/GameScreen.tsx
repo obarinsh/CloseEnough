@@ -23,7 +23,8 @@ export function GameScreen() {
       hasStartedRef.current = true;
       startNewRound();
     }
-  }, [gameState.phase, gameState.currentWord, startNewRound]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState.phase, gameState.currentWord]);
 
   const { phase, currentWord, rating, userExplanation, difficulty } = gameState;
   

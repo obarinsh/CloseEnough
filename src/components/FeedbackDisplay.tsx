@@ -34,6 +34,20 @@ export function FeedbackDisplay({ word, rating, userExplanation, onNext }: Feedb
           <StarRating rating={rating.stars} size="lg" animated />
         </div>
         
+        {/* Points earned this round */}
+        <p 
+          className="animate-fade-in"
+          style={{ 
+            fontFamily: "'Fredoka', 'Nunito', sans-serif",
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            color: brandColor, 
+            marginBottom: 8,
+          }}
+        >
+          +{rating.stars} {rating.stars === 1 ? 'point' : 'points'}
+        </p>
+        
         <p 
           style={{ 
             fontFamily: "'Fredoka', 'Nunito', sans-serif",

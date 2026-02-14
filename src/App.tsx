@@ -10,9 +10,10 @@ type Screen = 'start' | 'game';
 
 function AppContent() {
   const [screen, setScreen] = useState<Screen>('start');
-  const { stats } = useGame();
+  const { stats, resetStats, resetGame } = useGame();
 
   const handleStart = () => {
+    resetGame(); // Reset game state to ensure fresh word with current settings
     setScreen('game');
   };
 
@@ -63,7 +64,7 @@ function AppContent() {
               <Logo size="md" showText={true} />
             </button>
             
-            <ScoreStreak stats={stats} compact />
+            <ScoreStreak stats={stats} compact onReset={resetStats} />
           </header>
 
           {/* Content */}

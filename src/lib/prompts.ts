@@ -1,5 +1,14 @@
 import type { Category, Word, Rating, Difficulty } from './types';
 
+// Strip markdown formatting (asterisks, underscores) from text
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, '$1')  // **bold**
+    .replace(/\*([^*]+)\*/g, '$1')       // *italic*
+    .replace(/__([^_]+)__/g, '$1')       // __bold__
+    .replace(/_([^_]+)_/g, '$1');        // _italic_
+}
+
 export function getWordGenerationPrompt(category: Category | 'all', excludeWords: string[], difficulty: Difficulty): string {
   const categoryContext = category === 'all' 
     ? 'any category (psychology, society, science, economics, tech, or art/philosophy)'
@@ -20,12 +29,23 @@ Choose a simple, everyday word that most people can explain reasonably well.
 BAD examples for easy (too complex): cognitive dissonance, gaslighting, existentialism`
     : `
 DIFFICULTY: HARD
-Choose a word that seems familiar but is surprisingly tricky to define precisely.
-- People think they know it but struggle to articulate it clearly
-- Tests the "illusion of explanatory depth"
-- Perfect examples: sarcasm, irony, algorithm, empathy, metabolism, gaslighting, cognitive dissonance, inflation, democracy
+Choose a word that is SPECIFIC and INTERESTING - something people have heard of but would struggle to explain precisely.
 
-BAD examples for hard (too obscure): epistemology, ontological, phenotype, synecdoche`;
+IMPORTANT RULES:
+- AVOID generic abstract words like: meaning, truth, beauty, art, time, reality, existence, nature, life, love
+- PREFER specific concepts, movements, phenomena, or terms that have a defined meaning
+- The word should make someone think "Oh, I know that word... wait, how DO I explain it?"
+
+GREAT examples by category:
+- Psychology: gaslighting, cognitive dissonance, Dunning-Kruger effect, Stockholm syndrome, impostor syndrome
+- Society: gentrification, populism, social contract, civil disobedience, apartheid
+- Science: entropy, photosynthesis, placebo effect, natural selection, black hole
+- Economics: inflation, recession, hedge fund, arbitrage, supply and demand
+- Tech: algorithm, encryption, machine learning, blockchain, cloud computing
+- Art: Renaissance, Impressionism, Baroque, surrealism, minimalism, allegory, satire
+
+BAD examples (too vague/generic): meaning, truth, beauty, art, creativity, purpose, existence
+BAD examples (too obscure): epistemology, ontological, phenotype, synecdoche`;
 
   return `Generate a word for the "Close Enough" game.
 
@@ -33,10 +53,13 @@ The word should be from: ${categoryContext}
 ${difficultyInstructions}
 
 CRITICAL REQUIREMENTS:
-1. FREQUENTLY ENCOUNTERED - People hear/read this word regularly in everyday life
-2. INTUITIVELY UNDERSTOOD - Most people feel they know what it means from context
-3. NOT OBSCURE - The user should immediately recognize the word
+1. SPECIFIC & INTERESTING - Choose a precise term, not a vague abstract concept
+2. RECOGNIZABLE - People have heard this word before in school, news, or conversation
+3. CHALLENGING TO DEFINE - Easy to recognize, hard to explain accurately
+4. NOT BORING - Avoid generic words like "meaning", "truth", "beauty", "time"
 ${excludeList}
+
+IMPORTANT: Do NOT use any markdown formatting (no asterisks, no bold, no italics). Write in plain text only.
 
 Respond in this exact JSON format:
 {
@@ -80,6 +103,8 @@ TONE EXAMPLES:
 - "Here's the full picture..."
 - "Close enough! You clearly get the gist."
 
+IMPORTANT: Do NOT use any markdown formatting (no asterisks, no bold, no italics). Write in plain text only.
+
 Respond in this exact JSON format:
 {
   "stars": 1-5,
@@ -96,12 +121,12 @@ Only output the JSON, nothing else.`;
 
 function getCategoryDescription(category: Category): string {
   const descriptions: Record<Category, string> = {
-    psychology: 'Psychology & Human Behavior - words about how people think, feel, and behave',
-    society: 'Society & Culture - words about how communities and civilizations work',
-    science: 'Science & Nature - words about the natural world and scientific concepts',
-    economics: 'Money & Economics - words about finance, trade, and economic systems',
-    tech: 'Tech & Digital - words about technology, internet, and digital life',
-    art: 'Art & Philosophy - words about creativity, meaning, and abstract concepts',
+    psychology: 'Psychology & Human Behavior - specific psychological phenomena, effects, syndromes, or behavioral concepts (e.g., cognitive dissonance, impostor syndrome, confirmation bias)',
+    society: 'Society & Culture - specific social movements, political concepts, or cultural phenomena (e.g., gentrification, populism, civil disobedience)',
+    science: 'Science & Nature - specific scientific concepts, processes, or phenomena (e.g., photosynthesis, entropy, natural selection)',
+    economics: 'Money & Economics - specific economic terms, mechanisms, or financial concepts (e.g., inflation, recession, compound interest)',
+    tech: 'Tech & Digital - specific technology concepts, systems, or digital phenomena (e.g., algorithm, encryption, machine learning)',
+    art: 'Art & Philosophy - specific art movements, literary devices, or aesthetic concepts (e.g., Renaissance, Impressionism, satire, allegory)',
   };
   return descriptions[category];
 }
@@ -124,10 +149,10 @@ export function parseWordResponse(response: string): Word | null {
     
     if (parsed.word && parsed.category && parsed.definition) {
       return {
-        word: parsed.word,
+        word: stripMarkdown(parsed.word),
         category: parsed.category,
-        hint: parsed.hint || undefined,
-        definition: parsed.definition,
+        hint: parsed.hint ? stripMarkdown(parsed.hint) : undefined,
+        definition: stripMarkdown(parsed.definition),
       };
     }
     return null;
@@ -156,10 +181,14 @@ export function parseRatingResponse(response: string): Rating | null {
     if (typeof parsed.stars === 'number' && parsed.fullExplanation) {
       return {
         stars: Math.min(5, Math.max(1, parsed.stars)),
-        whatYouGotRight: Array.isArray(parsed.whatYouGotRight) ? parsed.whatYouGotRight : [],
-        whatYouMissed: Array.isArray(parsed.whatYouMissed) ? parsed.whatYouMissed : [],
-        fullExplanation: parsed.fullExplanation,
-        encouragement: parsed.encouragement || 'Keep playing!',
+        whatYouGotRight: Array.isArray(parsed.whatYouGotRight) 
+          ? parsed.whatYouGotRight.map(stripMarkdown) 
+          : [],
+        whatYouMissed: Array.isArray(parsed.whatYouMissed) 
+          ? parsed.whatYouMissed.map(stripMarkdown) 
+          : [],
+        fullExplanation: stripMarkdown(parsed.fullExplanation),
+        encouragement: stripMarkdown(parsed.encouragement || 'Keep playing!'),
       };
     }
     return null;

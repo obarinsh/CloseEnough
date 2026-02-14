@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import type { Word, Rating, Category, Difficulty, UserStats, GameState } from '@/lib/types';
-import { getStats, updateStatsAfterRound } from '@/lib/storage';
+import { getStats, updateStatsAfterRound, resetStats as resetStorageStats } from '@/lib/storage';
 import { 
   generateWord, 
   rateExplanation, 
@@ -22,6 +22,7 @@ interface GameContextType {
   setCategory: (category: Category | 'all') => void;
   setDifficulty: (difficulty: Difficulty) => void;
   resetGame: () => void;
+  resetStats: () => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -51,6 +52,9 @@ export function GameProvider({ children }: GameProviderProps) {
   const [stats, setStats] = useState<UserStats>(getStats);
   const [error, setError] = useState<string | null>(null);
   const [isApiReady] = useState(() => isApiConfigured());
+  
+  // Track the current request to prevent race conditions
+  const currentRequestIdRef = useRef(0);
 
   // Load stats on mount
   useEffect(() => {
@@ -59,6 +63,10 @@ export function GameProvider({ children }: GameProviderProps) {
 
   const startNewRound = useCallback(async () => {
     setError(null);
+    
+    // Generate a unique request ID to track this specific request
+    const requestId = ++currentRequestIdRef.current;
+    
     setGameState(prev => ({ 
       ...prev, 
       phase: 'loading',
@@ -85,12 +93,22 @@ export function GameProvider({ children }: GameProviderProps) {
         );
       }
       
+      // Only update state if this is still the most recent request
+      if (requestId !== currentRequestIdRef.current) {
+        return; // A newer request was made, ignore this result
+      }
+      
       setGameState(prev => ({
         ...prev,
         currentWord: word,
         phase: 'explaining',
       }));
     } catch (err) {
+      // Check if this request is still relevant
+      if (requestId !== currentRequestIdRef.current) {
+        return; // A newer request was made, ignore this result
+      }
+      
       console.error('Failed to generate word:', err);
       // Fall back to demo words on error
       const word = getRandomFallbackWord(
@@ -184,15 +202,26 @@ export function GameProvider({ children }: GameProviderProps) {
   }, []);
 
   const resetGame = useCallback(() => {
-    setGameState({
+    // Reset game state but preserve category and difficulty settings
+    setGameState(prev => ({
+      ...prev,
       currentWord: null,
       userExplanation: '',
       rating: null,
       phase: 'loading',
-      selectedCategory: 'all',
-      difficulty: 'easy',
-    });
+    }));
     setError(null);
+  }, []);
+
+  const resetStats = useCallback(() => {
+    resetStorageStats();
+    setStats({
+      totalScore: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      wordsAttempted: [],
+      lastPlayedDate: '',
+    });
   }, []);
 
   return (
@@ -207,6 +236,7 @@ export function GameProvider({ children }: GameProviderProps) {
         setCategory,
         setDifficulty,
         resetGame,
+        resetStats,
       }}
     >
       {children}
